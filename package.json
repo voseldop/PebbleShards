@@ -1,0 +1,51 @@
+{
+    "author": "Vadim Podlesov",
+    "dependencies": {
+        "pebble-clay": "^1.0.3"
+    },
+    "keywords": [],
+    "name": "shards",
+    "pebble": {
+        "capabilities": [
+            "location",
+            "configurable"
+        ],
+        "displayName": "Shards",
+        "enableMultiJS": true,
+        "messageKeys": [
+            "TEMPERATURE",
+            "CONDITIONS",
+            "SECONDS_TICK",
+            "BACKGROUND_COLOR",
+            "FOREGROUND_COLOR"
+        ],
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "fonts/weather_font.ttf",
+                    "name": "FONT_WEATHER_24",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[0-9:A-Za-z\u00b0\\-\\+ ]",
+                    "file": "fonts/watchface_font.ttf",
+                    "name": "FONT_WATCHFACE_OPENSANS_20",
+                    "targetPlatforms": null,
+                    "type": "font"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt"
+        ],
+        "uuid": "3ca13d01-7969-40d6-89d1-0151c9a6c339",
+        "watchapp": {
+            "watchface": true
+        }
+    },
+    "version": "1.0.0"
+}
