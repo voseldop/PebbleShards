@@ -1,11 +1,7 @@
 module.exports = [
   {
     "type": "heading",
-    "defaultValue": "App Configuration"
-  },
-  {
-    "type": "text",
-    "defaultValue": "Here is some introductory text."
+    "defaultValue": "Shards watchface configuration"
   },
   {
     "type": "section",
@@ -18,13 +14,13 @@ module.exports = [
         "type": "color",
         "messageKey": "BACKGROUND_COLOR",
         "defaultValue": "0x000000",
-        "label": "Background Color"
+        "label": "Background color"
       },
       {
         "type": "color",
         "messageKey": "FOREGROUND_COLOR",
         "defaultValue": "0xFFFFFF",
-        "label": "Foreground Color"
+        "label": "Hours and Minutes arrow color"
       }
     ]
   },
@@ -38,13 +34,13 @@ module.exports = [
       {
         "type": "toggle",
         "messageKey": "SECONDS_TICK",
-        "label": "Enable Seconds",
+        "label": "Enable seconds arrow",
         "defaultValue": true
       }
     ]
   },
   {
     "type": "submit",
-    "defaultValue": "Save Settings"
+    "defaultValue": "Save"
   }
 ];

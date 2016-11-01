@@ -20,7 +20,7 @@ typedef struct ClaySettings {
 } ClaySettings;
 
 // An instance of the struct
-static ClaySettings settings={SecondTick: true};
+static ClaySettings settings;
 
 const int inbox_size = 128;
 const int outbox_size = 128;
@@ -154,10 +154,10 @@ static void drawBackground(Layer *layer, GContext *ctx)
 {
   if (size == 0)
   {
-      graphics_context_set_fill_color(ctx, GColorBlack);  
+      graphics_context_set_fill_color(ctx, settings.BackgroundColor);  
       graphics_fill_rect(ctx, bounds, 0, GCornerNone);
       graphics_context_set_stroke_width(ctx, 1);
-      graphics_context_set_fill_color(ctx, GColorBlack);
+      graphics_context_set_fill_color(ctx, settings.BackgroundColor);
       graphics_context_set_stroke_color(ctx, GColorRed); 
       graphics_fill_circle(ctx, GPoint(bounds.size.w/2, bounds.size.h/2), radius*2/3);
       graphics_draw_circle(ctx, GPoint(bounds.size.w/2, bounds.size.h/2), radius*2/3);
@@ -200,8 +200,8 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
     graphics_context_set_stroke_width(ctx, 1);
     drawArrow(radius*2/3 + ARROW_MARGIN, seconds*6, 2, ctx);
   }
-  graphics_context_set_fill_color(ctx, GColorWhite);
-  graphics_context_set_stroke_color(ctx, GColorWhite); 
+  graphics_context_set_fill_color(ctx, settings.ForegroundColor);
+  graphics_context_set_stroke_color(ctx, settings.ForegroundColor); 
   graphics_context_set_stroke_width(ctx, 1);
   drawArrow(radius*2/3 + 2*ARROW_MARGIN, minutes*6, 3, ctx);
   graphics_context_set_stroke_width(ctx, 1);
@@ -306,6 +306,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   }
   // ...
   prv_save_settings();
+  layer_mark_dirty(s_canvas_layer);
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -365,6 +366,9 @@ static void deinit() {
 }
 
 int main(void) {
+  settings.BackgroundColor = GColorBlack;
+  settings.ForegroundColor = GColorWhite;
+  settings.SecondTick = true;
   init();
   app_event_loop();
   deinit();
