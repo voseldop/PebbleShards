@@ -17,7 +17,21 @@ typedef struct ClaySettings {
   GColor ForegroundColor;
   bool SecondTick;
   bool Animations;
+  bool MetricUnits;
 } ClaySettings;
+
+struct CodePair 
+{
+   short code;
+   char symbol;
+};
+
+enum WEATHER_STATUS 
+{
+  INVALID = 0,
+  INPROGRESS,
+  VALID
+};
 
 // An instance of the struct
 static ClaySettings settings;
@@ -32,12 +46,13 @@ static int radius = 0;
 static GFont font;
 static GFont weather_font;
 
+static int temperature;
 static int seconds;
 static int minutes;
 static int hours;
 static int s_battery_level;
 static char s_buffer[8];
-static char weather_update = 1;
+static enum WEATHER_STATUS weather_update = INVALID;
 static bool bluetooth_connected = 0;
 static int size = 0;
 static uint8_t * background = NULL;
@@ -47,12 +62,6 @@ static uint8_t * background = NULL;
 static char temperature_buffer[8];
 static char conditions_buffer[32];
 static char weather_layer_buffer[32]="";
-
-struct CodePair 
-{
-   short code;
-   char symbol;
-};
 
 static struct CodePair icons[] = {{800, 'N'}, {801, 'C'}, {802, 'S'}, {803, 'S'}, {804, 'S'},
                                  {600, 'a'}, {601, 'a'}, {602, 'a'}, {611, 'a'}, {612, 'a'}, {615, 'a'}, {616, 'a'}, {620, 'a'}, {621, 'a'}, {622, 'a'},
@@ -113,16 +122,16 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time(tick_time);
   // Get weather update every 30 minutes
   if(tick_time->tm_min % 30 == 0) {
-    weather_update = 1;
+    weather_update = INVALID;
   }
   
   if (!bluetooth_connected)
     return;
   
-  if (weather_update==1 || strlen(weather_layer_buffer)==0 || (weather_update && tick_time->tm_sec % 15 == 0))
+  if (weather_update==INVALID|| strlen(weather_layer_buffer)==0 || (weather_update==INPROGRESS && tick_time->tm_sec % 30 == 0))
   {
     update_weather();
-    weather_update = 2;
+    weather_update = INPROGRESS;
   }
 }
 
@@ -202,6 +211,7 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   }
   graphics_context_set_fill_color(ctx, settings.ForegroundColor);
   graphics_context_set_stroke_color(ctx, settings.ForegroundColor); 
+  graphics_context_set_text_color(ctx, settings.ForegroundColor);
   graphics_context_set_stroke_width(ctx, 1);
   drawArrow(radius*2/3 + 2*ARROW_MARGIN, minutes*6, 3, ctx);
   graphics_context_set_stroke_width(ctx, 1);
@@ -268,6 +278,11 @@ static char get_icon(int code) {
   }
   return ' ';
 }
+
+static int toImperial(int val)
+{
+  return 9*val/5 + 32;
+}
   
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Message received!");
@@ -277,13 +292,19 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   
   // If all data is available, use it
   if(temp_tuple && conditions_tuple) {
-    snprintf(temperature_buffer, sizeof(temperature_buffer), "%d°C", (int)temp_tuple->value->int32);
+    temperature = (int)temp_tuple->value->int32;
+    if (settings.MetricUnits) {
+      snprintf(temperature_buffer, sizeof(temperature_buffer), "%d°C", temperature);
+    }
+    else {
+      snprintf(temperature_buffer, sizeof(temperature_buffer), "%d°F", toImperial(temperature));
+    }
     snprintf(conditions_buffer, sizeof(conditions_buffer), "%c", get_icon((int)conditions_tuple->value->int32));
   }
   
   // Assemble full string and display
   snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s", temperature_buffer);
-  weather_update = 0;
+  weather_update = VALID;
   
   // Assign the values to our struct
   Tuple *bg_color_t = dict_find(iterator, MESSAGE_KEY_BACKGROUND_COLOR);
@@ -304,6 +325,20 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
     settings.SecondTick = seconds_tick->value->int32 == 1;      
   }
+  
+  Tuple *temperature_units = dict_find(iterator, MESSAGE_KEY_TEMP_FORMAT);
+  if (temperature_units) {
+    settings.MetricUnits = strcmp("metric", temperature_units->value->cstring) == 0;
+    if (settings.MetricUnits) {
+      snprintf(temperature_buffer, sizeof(temperature_buffer), "%d°C", temperature);
+    }
+    else {
+      snprintf(temperature_buffer, sizeof(temperature_buffer), "%d°F", toImperial(temperature));
+    }
+    // Assemble full string and display
+    snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s", temperature_buffer);
+  }
+  
   // ...
   prv_save_settings();
   layer_mark_dirty(s_canvas_layer);
@@ -369,6 +404,7 @@ int main(void) {
   settings.BackgroundColor = GColorBlack;
   settings.ForegroundColor = GColorWhite;
   settings.SecondTick = true;
+  settings.MetricUnits = true;
   init();
   app_event_loop();
   deinit();

@@ -17,7 +17,7 @@ var xhrRequest = function (url, type, callback) {
 function locationSuccess(pos) {
   // Construct URL
   var url = 'http://api.openweathermap.org/data/2.5/weather?lat=' +
-      pos.coords.latitude + '&lon=' + pos.coords.longitude + '&appid=' + myAPIKey;
+      pos.coords.latitude + '&lon=' + pos.coords.longitude + '&appid=' + myAPIKey+"&units=metric";
   
   console.log('Request is ' + url);
 
@@ -28,7 +28,7 @@ function locationSuccess(pos) {
       var json = JSON.parse(responseText);
 
       // Temperature in Kelvin requires adjustment
-      var temperature = Math.round(json.main.temp - 273.15);
+      var temperature = Math.round(json.main.temp);
       console.log('Temperature is ' + temperature);
 
       // Conditions
@@ -80,7 +80,7 @@ Pebble.addEventListener('ready',
 // Listen for when an AppMessage is received
 Pebble.addEventListener('appmessage',
   function(e) {
-    console.log('AppMessage received!');
+    console.log('AppMessage received! format: ');
     getWeather();
   }                     
 );

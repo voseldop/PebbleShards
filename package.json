@@ -17,7 +17,8 @@
             "CONDITIONS",
             "SECONDS_TICK",
             "BACKGROUND_COLOR",
-            "FOREGROUND_COLOR"
+            "FOREGROUND_COLOR",
+            "TEMP_FORMAT"
         ],
         "projectType": "native",
         "resources": {

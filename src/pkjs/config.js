@@ -36,6 +36,13 @@ module.exports = [
         "messageKey": "SECONDS_TICK",
         "label": "Enable seconds arrow",
         "defaultValue": true
+      },
+      {
+        "type": "radiogroup",
+        "messageKey": "TEMP_FORMAT",
+        "label": "Temperature units",
+        "defaultValue": "metric",
+        "options": [{"label" : "Metric", "value": "metric"}, {"label" :"Imperial", "value" : "imperial"}]
       }
     ]
   },
